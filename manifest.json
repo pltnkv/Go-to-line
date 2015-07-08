@@ -18,6 +18,12 @@
 		"default_icon": "icons/icon_16.png",
 		"default_popup": "popup.html"
 	},
+	"background": {
+		"scripts": [
+			"js/background.js"
+		],
+		"persistent": false
+	},
 	"content_scripts": [
 		{
 			"matches": [
@@ -25,7 +31,8 @@
 				"http://*/*"
 			],
 			"js": [
-				"js/decorate.js",
+				"libs/jquery-2.1.4.min.js",
+				"js/decorator.js",
 				"js/inject.js"
 			]
 		}
