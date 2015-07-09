@@ -1,7 +1,7 @@
 {
 	"name": "Go to line",
 	"description": "Go to line in plain files",
-	"version": "1.0",
+	"version": "1.1",
 	"permissions": [
 		"tabs",
 		"http://*/*",
@@ -32,7 +32,6 @@
 			],
 			"js": [
 				"libs/jquery-2.1.4.min.js",
-				"js/decorator.js",
 				"js/inject.js"
 			]
 		}

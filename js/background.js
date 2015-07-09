@@ -10,13 +10,24 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	}
 });
 
-chrome.tabs.onActivated.addListener(function (tabId) {
-	if (isEnabledTab(tabId)) {
-		enable(tabId);
-	} else {
-		disable(tabId);
-	}
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+	var tabId = activeInfo.tabId;
+	isSupportedTab(tabId, function (supported) {
+		if (supported && isEnabledTab(tabId)) {
+			enable(tabId);
+		} else {
+			disable(tabId);
+		}
+	})
 });
+
+function isSupportedTab(tabId, callback) {
+	chrome.tabs.get(tabId, function (tab) {
+		var arr = tab.url.split("/");
+		var scheme = arr[0];
+		callback(scheme == 'http:' || scheme == 'https:');
+	});
+}
 
 function isEnabledTab(tabId) {
 	return disabledTabs.indexOf(tabId) == -1

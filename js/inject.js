@@ -1,22 +1,16 @@
-console.log('inject.js loaded');
 $(function () {
 	var plainFile = isPlainFile();
-	console.log('isPlainFile = ', plainFile);
 	if (plainFile) {
 		tryGoToLineAfterPageLoaded();
+	} else {
+		prepareLinks();
 	}
 
-	//console.log('!!!4', $('.graph-occurrences-minute-svg-container'), $('.traceback-inner'));
-	//body.children.length)
-	//style="word-wrap: break-word; white-space: pre-wrap;"
-
-	/*if (Math.random() > 0.5) {
-	 console.log('setDisabled');
-	 chrome.runtime.sendMessage({setDisabled: true});
-	 } else {
-	 console.log('setEnabled');
-	 chrome.runtime.sendMessage({setEnabled: true});
-	 }*/
+	if (plainFile) {
+		chrome.runtime.sendMessage({setEnabled: true});
+	} else {
+		chrome.runtime.sendMessage({setDisabled: true});
+	}
 });
 
 function isPlainFile() {
@@ -28,7 +22,6 @@ function isPlainFile() {
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	console.log('goToLine', request.lineNumber);
 	goToLine(request.lineNumber);
 });
 
@@ -71,4 +64,30 @@ function getParameterByName(name) {
 	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
 		results = regex.exec(location.search);
 	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function prepareLinks() {
+	$('a').filter(function () {
+		var lastPart = this.href.split('.').pop();
+		return hasSupportedExtension(lastPart) && this.href.indexOf('?') == -1
+	}).each(function () {
+		var lineNumber = getLineNumber(this);
+		if (!isNaN(lineNumber) && lineNumber > 0) {
+			this.href += '?gtl=' + lineNumber
+		}
+	})
+}
+
+//rollbar.com only implementation
+//lineNumber can be in the link itself
+function getLineNumber(a) {
+	var nextElement = a.nextElementSibling;
+	if (nextElement) {
+		return parseInt(nextElement.innerText)
+	}
+	return false
+}
+
+function hasSupportedExtension(ext) {
+	return ext == 'js'
 }

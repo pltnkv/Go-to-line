@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
 	createInput();
-	//tryGoToLineAfterPageLoaded();
 });
 
 function createInput() {
@@ -30,18 +29,3 @@ function goToLine(lineNumber) {
 
 	return true
 }
-/*
-function tryGoToLineAfterPageLoaded() {
-	chrome.tabs.getSelected(null, function (tab) {
-		var tablink = tab.url;
-		var lineNumber = parseInt(getParameterByName(tablink, 'gtl'));
-		goToLine(lineNumber);
-	});
-}
-
-function getParameterByName(url, name) {
-	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-		results = regex.exec(url);
-	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}*/
