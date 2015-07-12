@@ -21,20 +21,31 @@ function isPlainFile() {
 	return pre.nodeName === 'PRE' && pre.attributes[0].value === 'word-wrap: break-word; white-space: pre-wrap;';
 }
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	goToLine(request.lineNumber);
+chrome.runtime.onMessage.addListener(function (request) {
+	goTo(request.lineNumber, request.columnNumber);
 });
 
+function goTo(lineNumber, columnNumber) {
+	var span = goToLine(lineNumber);
+	if (span && !isNaN(columnNumber) && columnNumber > 0) {
+		goToColumn(span, columnNumber);
+	}
+	if (span) {
+		document.body.scrollTop = span.offsetTop - 100;
+	}
+}
+
+
 function goToLine(lineNumber) {
-	lineNumber = lineNumber - 1;//отсчитываем строки с нуля
+	lineNumber = lineNumber - 1;
 
 	var pre = document.querySelectorAll('pre')[0];
-	var snapId = 'id_' + Math.random();
-	var openTag = '<span id="' + snapId + '" style="color:red;">';
+	var spanId = 'id_' + Math.random();
+	var openTag = '<span id="' + spanId + '" style="color:red;">';
 	var closeTag = '</span>';
 	var currentLineNumber = 0;
 	if (lineNumber == 0) {
-		pre.innerHTML = openTagW + pre.innerHTML;
+		pre.innerHTML = openTag + pre.innerHTML;
 		pre.innerHTML = pre.innerHTML.replace(/\n/, closeTag + '\n');
 	} else {
 		pre.innerHTML = pre.innerHTML.replace(/\n/g, function () {
@@ -49,13 +60,25 @@ function goToLine(lineNumber) {
 		});
 	}
 
-	document.body.scrollTop = document.getElementById(snapId).offsetTop - 100;
+	return document.getElementById(spanId)
+}
+
+function goToColumn(span, columnNumber) {
+	var innerHTML = span.innerText;
+	var columnOpenTag = '<span style="font-weight: bold;">';
+	var closeTag = '</span>';
+	innerHTML = innerHTML.replace(new RegExp('^.{' + (columnNumber - 1) + '}'), function (match) {
+		return match + columnOpenTag;
+	});
+	innerHTML += closeTag;
+	span.innerHTML = innerHTML;
 }
 
 function tryGoToLineAfterPageLoaded() {
 	var lineNumber = parseInt(getParameterByName('gtl'));
+	var columnNumber = parseInt(getParameterByName('gtl_column'));
 	if (!isNaN(lineNumber) && lineNumber > 0) {
-		goToLine(lineNumber);
+		goTo(lineNumber, columnNumber);
 	}
 }
 
@@ -69,25 +92,29 @@ function getParameterByName(name) {
 function prepareLinks() {
 	$('a').filter(function () {
 		var lastPart = this.href.split('.').pop();
-		return hasSupportedExtension(lastPart) && this.href.indexOf('?') == -1
+		return itLinkProbablyHasExtension(lastPart) && this.href.indexOf('?') == -1
 	}).each(function () {
-		var lineNumber = getLineNumber(this);
-		if (!isNaN(lineNumber) && lineNumber > 0) {
-			this.href += '?gtl=' + lineNumber
+		var linkInfo = processLink(this);
+		if (linkInfo) {
+			this.href += '?gtl=' + linkInfo.lineNumber;
+			if (linkInfo.columnNumber) {
+				this.href += '&gtl_column=' + linkInfo.columnNumber;
+			}
 		}
 	})
 }
 
-//rollbar.com only implementation
-//lineNumber can be in the link itself
-function getLineNumber(a) {
-	var nextElement = a.nextElementSibling;
-	if (nextElement) {
-		return parseInt(nextElement.innerText)
+
+function processLink(linkElement) {
+	for (var i = 0; i < linkProcessors.length; i++) {
+		var linkInfo = linkProcessors[i](linkElement);
+		if (linkInfo.lineNumber > 0) {
+			return linkInfo;
+		}
 	}
-	return false
+	return null;
 }
 
-function hasSupportedExtension(ext) {
-	return ext == 'js'
+function itLinkProbablyHasExtension(ext) {
+	return ext && ext.length <= 4
 }
