@@ -11,15 +11,36 @@
 
         .label {
             display: block;
-            color: #999;
+            color: #666;
             font-size: 12px;
             margin-bottom: 10px
         }
+
+        .tips {
+            margin-top: 18px;
+            font-size: 11px;
+            line-height: 13px;
+            color: #999;
+        }
+
+        .error {
+            display: none;
+            width: 230px;
+        }
     </style>
+    <script src="js/utils.js"></script>
     <script src="js/popup.js"></script>
 </head>
 <body>
-<label class="label" for="lineNumber">Go to line:</label>
-<input type="text" id="lineNumber" autofocus="autofocus"/>
+<div id="errorMsg" class="error">Sorry, this page doesn't look like plain file</div>
+<div id="content">
+    <label class="label" for="lineNumber">Go to line:</label>
+    <input type="text" id="lineNumber" autofocus="autofocus" placeholder=""/>
+    <div class="tips">
+        Examples:<br>
+        534 - go to line only<br>
+        534:21 - go to line and column
+    </div>
+</div>
 </body>
 </html>

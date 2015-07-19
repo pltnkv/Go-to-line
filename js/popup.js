@@ -1,6 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
-	createInput();
+	pageIsPlainFile(function (isPlainFile) {
+		if (isPlainFile) {
+			createInput();
+		} else {
+			showError();
+		}
+	})
 });
+
+function pageIsPlainFile(callback) {
+	var code = isPlainFile.toString() + ';isPlainFile()';
+	chrome.tabs.executeScript({code: code}, function (args) {
+		callback(args[0])
+	});
+}
+
+function showError() {
+	document.getElementById('content').style.display = 'none';
+	document.getElementById('errorMsg').style.display = 'block';
+
+}
 
 function createInput() {
 	var input = document.getElementById('lineNumber');

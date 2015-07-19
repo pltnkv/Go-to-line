@@ -1,24 +1,22 @@
 $(function () {
 	var plainFile = isPlainFile();
 	if (plainFile) {
-		tryGoToLineAfterPageLoaded();
+		tryGoToLine();
 	} else {
-		prepareLinks();
-	}
-
-	if (plainFile) {
-		chrome.runtime.sendMessage({setEnabled: true});
-	} else {
-		chrome.runtime.sendMessage({setDisabled: true});
+		checkLinksParsingEnabled(function (enabled) {
+			if (enabled) {
+				prepareLinks();
+			}
+		})
 	}
 });
 
-function isPlainFile() {
-	if (document.body.children.length !== 1) {
-		return false
-	}
-	var pre = document.body.children[0];
-	return pre.nodeName === 'PRE' && pre.attributes[0].value === 'word-wrap: break-word; white-space: pre-wrap;';
+function checkLinksParsingEnabled(callback) {
+	chrome.storage.sync.get({
+		linksParsing: true
+	}, function (items) {
+		callback(items.linksParsing);
+	});
 }
 
 chrome.runtime.onMessage.addListener(function (request) {
@@ -34,7 +32,6 @@ function goTo(lineNumber, columnNumber) {
 		document.body.scrollTop = span.offsetTop - 100;
 	}
 }
-
 
 function goToLine(lineNumber) {
 	lineNumber = lineNumber - 1;
@@ -74,7 +71,7 @@ function goToColumn(span, columnNumber) {
 	span.innerHTML = innerHTML;
 }
 
-function tryGoToLineAfterPageLoaded() {
+function tryGoToLine() {
 	var lineNumber = parseInt(getParameterByName('gtl'));
 	var columnNumber = parseInt(getParameterByName('gtl_column'));
 	if (!isNaN(lineNumber) && lineNumber > 0) {
@@ -103,7 +100,6 @@ function prepareLinks() {
 		}
 	})
 }
-
 
 function processLink(linkElement) {
 	for (var i = 0; i < linkProcessors.length; i++) {

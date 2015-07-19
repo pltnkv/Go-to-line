@@ -1,25 +1,24 @@
-var disabledTabs = [];
+chrome.tabs.onCreated.addListener(function (tab) {
+	checkTab(tab.id);
+});
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	if (request.setDisabled) {
-		disabledTabs.push(sender.tab.id);
-		disable(sender.tab.id);
-	}
-	if (request.setEnabled) {
-		enable(sender.tab.id);
-	}
+chrome.tabs.onUpdated.addListener(function (tabId) {
+	checkTab(tabId);
 });
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
-	var tabId = activeInfo.tabId;
+	checkTab(activeInfo.tabId);
+});
+
+function checkTab(tabId) {
 	isSupportedTab(tabId, function (supported) {
-		if (supported && isEnabledTab(tabId)) {
+		if (supported) {
 			enable(tabId);
 		} else {
 			disable(tabId);
 		}
 	})
-});
+}
 
 function isSupportedTab(tabId, callback) {
 	chrome.tabs.get(tabId, function (tab) {
@@ -27,10 +26,6 @@ function isSupportedTab(tabId, callback) {
 		var scheme = arr[0];
 		callback(scheme == 'http:' || scheme == 'https:');
 	});
-}
-
-function isEnabledTab(tabId) {
-	return disabledTabs.indexOf(tabId) == -1
 }
 
 function enable(tabId) {
