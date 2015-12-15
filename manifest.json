@@ -1,7 +1,7 @@
 {
-	"name": "Go to line",
+	"name": "Go to line Test",
 	"description": "Go to a specified line in plain file in browser",
-	"version": "1.4",
+	"version": "1.5",
 	"permissions": [
 		"tabs",
 		"http://*/*",

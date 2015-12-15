@@ -6,6 +6,7 @@ $(function () {
 		checkLinksParsingEnabled(function (enabled) {
 			if (enabled) {
 				prepareLinks();
+				prepareRollbarPage();
 			}
 		})
 	}
@@ -113,4 +114,18 @@ function processLink(linkElement) {
 
 function itLinkProbablyHasExtension(ext) {
 	return ext && ext.length <= 4
+}
+
+function prepareRollbarPage() {
+	if (isRollbarPage()) {
+		var element = document.querySelector('.tab-content pre');
+		if (element) {
+			var pattern = /(http[s]?:\/\/.*js):(\d+):(\d+)/gmi
+			element.innerHTML = element.innerHTML.replace(pattern, '<a href="$1?gtl=$2&gtl_column=$3" target="_blank">$1:$2:$3</a>');
+		}
+	}
+}
+
+function isRollbarPage() {
+	return location.host == "rollbar.com"
 }
