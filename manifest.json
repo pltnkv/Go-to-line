@@ -1,5 +1,5 @@
 {
-	"name": "Go to line Test",
+	"name": "Go to line",
 	"description": "Go to a specified line in plain file in browser",
 	"version": "1.5",
 	"permissions": [
